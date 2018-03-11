@@ -6,6 +6,7 @@ class Role:
     night_chat = 0
     ready = False
     player = None
+    room = None
     day_vote_priority = 1
     
     def __init__(self):
@@ -21,7 +22,7 @@ class Role:
     def get_night_vote(self): # empty, no vote for villagers at night
         return "VOTE"
     def get_day_vote(self): # all players
-        return "VOTE " + " ".join([str(p.player_number) for p in self.room.players])
+        return self.room.gen_vote_list("all")
 
     def process_night_vote(self, votes):
         return None # no night vote to process
@@ -45,12 +46,12 @@ class Role:
         if mc or mt == -1: # tied vote or nl - same thing
             return None
         else:
-            return Visit(self.player.player_number, mt, lynch, 2)
+            return [Visit(self.player.player_number, mt, lynch, 2)]
     def lynch(self, visitor, visited):
         self.room.players[visited].alive = False
 
     def get_night_visit():
-        return None
+        return []
         
 
     def action(self, params): # blue villager has no actions

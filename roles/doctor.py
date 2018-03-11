@@ -1,13 +1,13 @@
-class Mafia(Role):
+class Doctor(Role):
 
     def __init__(self):
         super().__init__()
-        name = "Mafia"
-        alignment = 1
-        night_chat = 1
+        self.name = "Doctor"
+        self.alignment = 0
+        self.night_chat = 2
 
     def get_night_vote(self):
-        return self.room.gen_vote_list("not mafia")
+        return self.room.gen_vote_list("all")
 
     def process_night_vote(self, votes):
         counts = {}
@@ -26,9 +26,9 @@ class Mafia(Role):
                 mc = False
             elif counts[k] == max:
                 mc = True
-        if mc or mt == -1: # tied vote or nl - same thing
+        if mc or mt == -1: # tied vote or no one
             return []
         else:
-            return [Visit(self.player.player_number, mt, nightkill, 2)]
-    def nightkill(self, visitor, visited):
-        self.room.players[visited].alive = False
+            return [Visit(self.player.player_number, mt, save, 2)]
+    def save(self, visitor, visited):
+        self.room.players[visited].evars.append("save")

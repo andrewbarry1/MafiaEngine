@@ -2,7 +2,7 @@ from twisted.python import log
 from twisted.internet import reactor
 from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.twisted.websocket import WebSocketServerFactory
-
+from roles import * # TODO separate everything for setup creation
 
 rooms = {}
 
@@ -17,6 +17,7 @@ class MafiaPlayer(WebSocketServerProtocol):
         self.player_number = -1
         self.alive = True
         self.vote = -2
+        self.evars = []
         
     def onMessage(self, payload, isBinary):
         if (isBinary):
@@ -33,8 +34,10 @@ class MafiaPlayer(WebSocketServerProtocol):
                 if room_number in rooms:
                     self.room = rooms[room_number]
                     res = self.room.add_player(self)
-                    if (res) sendMessage("JOIN " + self.name)
-                    else sendMessage("ERROR")
+                    if (res):
+                        sendMessage("JOIN " + self.name)
+                    else:
+                        sendMessage("ERROR")
             except: # not a number, no number, etc
                 sendMessage("ERROR")
 
@@ -57,6 +60,11 @@ class MafiaPlayer(WebSocketServerProtocol):
         else:
             self.vote = vote_n
             self.ready = True
+        self.room.vote(self.player_number, self.chat_number, vote_n)
+
+    def kill(self):
+        if "save" not in evars:
+            self.alive = False
 
     def setMeeting(self, meet_n):
         self.chat_number = meet_n
