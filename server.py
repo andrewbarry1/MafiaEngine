@@ -34,9 +34,9 @@ class MafiaPlayer(WebSocketServerProtocol):
                     self.room = rooms[room_number]
                     res = self.room.add_player(self)
                     if (res) sendMessage("JOIN " + self.name)
-                    else self.sendMessage("ERROR")
+                    else sendMessage("ERROR")
             except: # not a number, no number, etc
-                self.sendMessage("ERROR")
+                sendMessage("ERROR")
 
         elif (command == "NAME"): # set name
             try:
@@ -57,6 +57,11 @@ class MafiaPlayer(WebSocketServerProtocol):
         else:
             self.vote = vote_n
             self.ready = True
+
+    def setMeeting(self, meet_n):
+        self.chat_number = meet_n
+        self.vote = -2
+        sendMessage("CHAT " + str(meet_n))
 
     def ready(self): # check if voted and actions are done
         return self.ready and self.role.ready
