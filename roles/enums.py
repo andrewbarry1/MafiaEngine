@@ -19,3 +19,7 @@ class VisitPriority(Enum):
     RoleConvert = 4
     Most = 5
     Vote = 6
+
+# some important voting constants
+VOTE_NONE = -2
+VOTE_NL = -1

@@ -2,8 +2,8 @@ from twisted.python import log
 from twisted.internet import reactor
 from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.twisted.websocket import WebSocketServerFactory
-from roles import * # TODO separate everything for setup creation
-
+from roles import *
+from roles.enums import *
 rooms = {}
 
 # MafiaProtocol is the client object
@@ -13,10 +13,10 @@ class MafiaPlayer(WebSocketServerProtocol):
         self.name = "--"
         self.room = None
         self.role = None
-        self.chat_number = -1
+        self.chat_number = Meeting.pregame
         self.player_number = -1
         self.alive = True
-        self.vote = -2
+        self.vote = VOTE_NL
         self.evars = []
         
     def onMessage(self, payload, isBinary):
@@ -68,7 +68,7 @@ class MafiaPlayer(WebSocketServerProtocol):
 
     def setMeeting(self, meet_n):
         self.chat_number = meet_n
-        self.vote = -2
+        self.vote = VOTE_NONE
         sendMessage("CHAT " + str(meet_n))
 
     def sys(self, msg):

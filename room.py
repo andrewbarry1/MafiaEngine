@@ -67,7 +67,7 @@ class MafiaRoom:
                 if (p.day_vote_priority > vote_processor.day_vote_priority):
                     vote_processor = p
                 p.setMeeting(p.role.night_chat)
-                p.vote(-2)
+                p.vote(VOTE_NONE)
                 p.role.get_night_action()
                 p.role.get_night_vote()
             v = vote_processor.process_day_vote(votes)
@@ -96,7 +96,7 @@ class MafiaRoom:
             # 3. reset everything, dump them all into town chat
             for p in self.players:
                 p.setMeeting(Meeting.day)
-                p.vote(-2)
+                p.vote(VOTE_NONE)
                 p.role.get_day_action()
                 p.role.get_day_vote()
                 p.evars = []

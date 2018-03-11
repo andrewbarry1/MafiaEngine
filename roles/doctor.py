@@ -19,7 +19,7 @@ class Doctor(Role):
             else:
                 counts[v] = 1
         max = 0
-        mt = -2
+        mt = VOTE_NONE
         mc = False
         for k in counts:
             if counts[k] > max:
@@ -28,7 +28,7 @@ class Doctor(Role):
                 mc = False
             elif counts[k] == max:
                 mc = True
-        if mc or mt == -1: # tied vote or no one
+        if mc or mt == VOTE_NL: # tied vote or no one
             return []
         else:
             return [Visit(self.player.player_number, mt, save, VisitPriority.Save)]

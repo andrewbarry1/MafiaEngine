@@ -36,7 +36,7 @@ class Role:
             else:
                 counts[v] = 1
         max = 0
-        mt = -2
+        mt = VOTE_NONE
         mc = False
         for k in counts:
             if counts[k] > max:
@@ -45,7 +45,7 @@ class Role:
                 mc = False
             elif counts[k] == max:
                 mc = True
-        if mc or mt == -1: # tied vote or nl - same thing
+        if mc or mt == VOTE_NL: # tied vote or nl - same thing
             return None
         else:
             return [Visit(self.player.player_number, mt, lynch, VisitPriority.Vote)]
