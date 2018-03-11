@@ -3,12 +3,13 @@ class Cop(Role):
     def __init__(self):
         super().__init__()
         self.name = "Cop"
-        self.alignment = 0
-        self.night_chat = 3
+        self.alignment = Alignment.town
+        self.night_chat = Meeting.none
 
     def gen_night_vote(self):
         return self.room.gen_vote_list("all")
 
+    
     def process_night_vote(self, votes):
         counts = {}
         for v in votes:
@@ -29,7 +30,7 @@ class Cop(Role):
         if mc or mt == -1: # tied vote or no one
             return []
         else:
-            return [Visit(self.player.player_number, mt, invest, 2)]
+            return [Visit(self.player.player_number, mt, invest, VisitPriority.Most)]
     def save(self, visitor, visited):
         t_align = "the town."
         pname = self.room.players[visited].name

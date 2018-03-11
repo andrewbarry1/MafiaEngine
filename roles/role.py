@@ -1,9 +1,9 @@
 # base role - Blue Villager
-
+from enums import *
 class Role:
     name = ""
-    alignment = 0
-    night_chat = 0
+    alignment = Alignment.town
+    night_chat = Meeting.none
     ready = False
     player = None
     room = None
@@ -20,6 +20,8 @@ class Role:
         return ''
 
     def get_night_vote(self): # empty, no vote for villagers at night
+        self.ready = True # ready up for the night
+        self.player.ready = True
         return "VOTE"
     def get_day_vote(self): # all players
         return self.room.gen_vote_list("all")
@@ -46,7 +48,7 @@ class Role:
         if mc or mt == -1: # tied vote or nl - same thing
             return None
         else:
-            return [Visit(self.player.player_number, mt, lynch, 2)]
+            return [Visit(self.player.player_number, mt, lynch, VisitPriority.Vote)]
     def lynch(self, visitor, visited):
         self.room.players[visited].alive = False
 

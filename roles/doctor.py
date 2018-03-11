@@ -3,8 +3,8 @@ class Doctor(Role):
     def __init__(self):
         super().__init__()
         self.name = "Doctor"
-        self.alignment = 0
-        self.night_chat = 2
+        self.alignment = Alignment.town
+        self.night_chat = Meeting.none
 
     def get_night_vote(self):
         return self.room.gen_vote_list("all")
@@ -29,6 +29,6 @@ class Doctor(Role):
         if mc or mt == -1: # tied vote or no one
             return []
         else:
-            return [Visit(self.player.player_number, mt, save, 2)]
+            return [Visit(self.player.player_number, mt, save, VisitPriority.Save)]
     def save(self, visitor, visited):
         self.room.players[visited].evars.append("save")

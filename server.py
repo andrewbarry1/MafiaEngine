@@ -71,6 +71,9 @@ class MafiaPlayer(WebSocketServerProtocol):
         self.vote = -2
         sendMessage("CHAT " + str(meet_n))
 
+    def sys(self, msg):
+        sendMessage("SYS " + msg)
+
     def ready(self): # check if voted and actions are done
         return self.ready and self.role.ready
 

@@ -3,8 +3,8 @@ class Mafia(Role):
     def __init__(self):
         super().__init__()
         name = "Mafia"
-        alignment = 1
-        night_chat = 1
+        alignment = Alignment.mafia
+        night_chat = Meeting.mafnight
 
     def get_night_vote(self):
         return self.room.gen_vote_list("not mafia")
@@ -29,6 +29,6 @@ class Mafia(Role):
         if mc or mt == -1: # tied vote or nl - same thing
             return []
         else:
-            return [Visit(self.player.player_number, mt, nightkill, 2)]
+            return [Visit(self.player.player_number, mt, nightkill, VisitPriority.Vote)]
     def nightkill(self, visitor, visited):
         self.room.players[visited].alive = False

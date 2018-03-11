@@ -8,10 +8,10 @@ class Visit:
         self.priority = priority
 
     def __lt__(self, other):
-        return (self.priority < other.priority)
+        return (self.priority.value < other.priority.value)
     def __gt__(self, other):
-        return (self.priority > other.priority)
+        return (self.priority.value > other.priority.value)
     def __eq__(self, other):
-        return (self.priority == other.priority)
+        return (self.priority.value == other.priority.value)
     def __ne__(self, other):
-        return not(self.priority == other.priority)
+        return not(self.priority.value == other.priority.value)
