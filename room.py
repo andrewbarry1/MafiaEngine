@@ -60,11 +60,16 @@ class MafiaRoom:
 
         
         if (time % 2 == 0): # moving to night time
-            # TODO process any day actions, votes
+            # TODO process day actions
+            vote_processor = self.players[0]
             for p in self.players:
+                if (p.day_vote_priority > vote_processor.day_vote_priority):
+                    vote_processor = p
                 p.setMeeting(p.role.night_chat)
                 p.role.get_night_action()
-
+            v = vote_processor.process_day_vote(votes)
+            if not(v is None):
+                v.callback(v.visitor, v.visited) # do the lynch
 
 
                 

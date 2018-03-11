@@ -6,6 +6,7 @@ class Role:
     night_chat = 0
     ready = False
     player = None
+    day_vote_priority = 1
     
     def __init__(self):
         self.room = None
