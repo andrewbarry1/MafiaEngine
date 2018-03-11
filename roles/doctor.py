@@ -1,3 +1,5 @@
+from role import Role
+from enums import *
 class Doctor(Role):
 
     def __init__(self):

@@ -58,3 +58,12 @@ class Role:
 
     def action(self, params): # blue villager has no actions
         pass # propagate through to items?
+
+
+    # Town win condition - no mafia left alive
+    def check_win(self, alive):
+        n_maf = len([p for p in alive if p.alignment == Alignment.mafia])
+        if (n_maf == 0):
+            return "Village"
+        else:
+            return None

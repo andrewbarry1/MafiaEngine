@@ -1,3 +1,5 @@
+from role import Role
+from enums import *
 class Mafia(Role):
 
     def __init__(self):
@@ -32,3 +34,12 @@ class Mafia(Role):
             return [Visit(self.player.player_number, mt, nightkill, VisitPriority.Vote)]
     def nightkill(self, visitor, visited):
         self.room.players[visited].alive = False
+
+
+    def check_win(self, alive):
+        n_maf = len([p for p in alive if p.alignment == Alignment.mafia])
+        n_town = len(alive) - n_maf
+        if (n_maf >= n_town):
+            return "Mafia"
+        else:
+            return None

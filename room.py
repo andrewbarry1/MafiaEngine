@@ -1,6 +1,6 @@
 import random
 from visit import Visit
-from enums import *
+from roles.enums import *
 class MafiaRoom:
     players = []
     setup = None
@@ -41,7 +41,8 @@ class MafiaRoom:
             return "VOTE " + " ".join([str(p.player_number) for p in self.players if p.alive])
         elif (vt == "not mafia"):
             return "VOTE " + " ".join([str(p.player_number) for p in self.players if p.alive and not(p.alignment == Alignment.mafia)])
-        else return [] # cult stuff, masons, etc can go here
+        else:
+            return [] # cult stuff, masons, etc can go here
             
 
     def check_advance_time(self):
@@ -99,6 +100,8 @@ class MafiaRoom:
                 p.role.get_day_action()
                 p.role.get_day_vote()
                 p.evars = []
+
+        check_win()
             
 
     # send message to other people in this chat (day, maf night, town night, etc)
@@ -115,3 +118,18 @@ class MafiaRoom:
         else:
             for player in [p for p in self.players if p.chat_number == chat_number or not p.alive]:
                 player.sendMessage("VOTE " + str(voter_n) + " " + str(target_n))
+
+
+    # TODO offload win conditions to the role to support 3ps and multiple factions
+    def check_win(self):
+        alive_players = [p for p in self.players if p.alive]
+        winners = []
+        checked_alignments = []
+        for p in alive_players:
+            if (p.alignment not in checked_alignments):
+                checked_alignments.append(p.alignment)
+                check = p.check_win(alive_players)
+                if check is not None:
+                    winners.append(check)
+        if len(winners) > 0: # someone won the game
+            pass # TODO move to postgame chat
