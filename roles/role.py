@@ -3,16 +3,13 @@
 class Role:
     name = ""
     alignment = 0
-    night_chat = -1
-    roleblocked = False
-    allowed_commands = {"VOTE":[0,1], "MSG":[0,1]}
-    target = -1 # target from night action
+    night_chat = 0
     ready = False
     player = None
     
-    def __init__(self, room, player):
-        self.room = room
-        self.player = play
+    def __init__(self):
+        self.room = None
+        self.player = None
     
     def get_night_action(self): # get night action html
         return ''
@@ -24,6 +21,36 @@ class Role:
         return "VOTE"
     def get_day_vote(self): # all players
         return "VOTE " + " ".join([str(p.player_number) for p in self.room.players])
+
+    def process_night_vote(self, votes):
+        return None # no night vote to process
+    def process_day_vote(self, votes): # process day vote (lynch, shared by all roles)
+        counts = {}
+        for v in votes:
+            if v in counts:
+                counts[v] += 1
+            else:
+                counts[v] = 1
+        max = 0
+        mt = -2
+        mc = False
+        for k in counts:
+            if counts[k] > max:
+                max = counts[k]
+                mt = k
+                mc = False
+            elif counts[k] == max:
+                mc = True
+        if mc or mt == -1: # tied vote or nl - same thing
+            return None
+        else:
+            return Visit(self.player.player_number, mt, lynch, 2)
+    def lynch(self, visitor, visited):
+        self.room.players[visited].alive = False
+
+    def get_night_visit():
+        return None
+        
 
     def action(self, params): # blue villager has no actions
         pass # propagate through to items?
