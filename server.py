@@ -18,6 +18,7 @@ class MafiaPlayer(WebSocketServerProtocol):
         self.alive = True
         self.vote = VOTE_NL
         self.evars = []
+        self.host = False
         
     def onMessage(self, payload, isBinary):
         if (isBinary):
@@ -83,6 +84,8 @@ class MafiaPlayer(WebSocketServerProtocol):
 
 
     def onClose(self, wasClean, code, reason):
+        if self.room is not None:
+            self.room.del_player(self)
         print("Client disconnected")
 
 if __name__ == '__main__':

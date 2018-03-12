@@ -13,14 +13,27 @@ class MafiaRoom:
 
     # add player to room
     def add_player(self, new_player):
-        if len(self.players) < len(self.setup):
-            self.players.append(new_player)
-            new_player.player_number = len(self.players) - 1
+        self.players.append(new_player)
+        new_player.player_number = len(self.players) - 1
+        if len(self.players) == 1:
+            new_player.host = True
+            new_player.sendMessage("HOST")
+        for player in self.players:
+            player.sendMessage("JOIN " + new_player.name + " " + str(new_player.player_number))
+        return False
+
+    # remove player from room (quit)
+    def del_player(self, old_player):
+        # game hasn't started yet, just remove player from room
+        if (time == -1):
+            self.players.remove(old_player)
             for player in self.players:
-                player.sendMessage("JOIN " + new_player.name + " " + str(new_player.player_number))
-            return False
-        else:
-            return True
+                player.sendMessage("QUIT " + old_player.player_number)
+            if old_player.host and len(self.players) > 0:
+                self.players[0].host = True
+                self.players[0].sendMessage("HOST")
+        else: # game has started - kill player instead
+            old_player.kill()
 
 
     def command(self, sender, command, params):
@@ -35,7 +48,16 @@ class MafiaRoom:
         elif (command == "ACTION"):
             sender.role.action(params)
             check_advance_time()
-
+        elif (command == "ADDROLE"):
+            if (sender.host and time == -1):
+                add_role(params)
+        elif (command == "DELROLE"):
+            if (sender.host and time == -1):
+                del_role(params)
+        elif (command == "STARTGAME"):
+            if (sender.host and time == -1 and len(self.players) == len(self.setup)):
+                advance_time()
+                
     def gen_vote_list(self, vt):
         if (vt == "all"):
             return "VOTE " + " ".join([str(p.player_number) for p in self.players if p.alive])
@@ -133,3 +155,25 @@ class MafiaRoom:
                     winners.append(check)
         if len(winners) > 0: # someone won the game
             pass # TODO move to postgame chat
+
+
+    # TODO come up with a way that's actually scalable
+    def add_role(self, name):
+        if (name == "Villager"):
+            self.setup.append(Role())
+        elif (name == "Mafia"):
+            self.setup.append(Mafia())
+        elif (name == "Doctor"):
+            self.setup.append(Doctor())
+        elif (name == "Cop"):
+            self.setup.append(Cop())
+
+
+    def del_role(self, name):
+        d = -1
+        for x in range(len(self.setup)):
+            if self.setup[x].name == name:
+                d = x
+                break
+        if not(d == -1):
+            self.setup.pop(x)
