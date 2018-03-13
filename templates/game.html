@@ -1,0 +1,103 @@
+$def with (room)
+
+<!doctype html>
+<html>
+  <head>
+    <title>Mafia</title>
+    <link rel="stylesheet" href="chat.css">
+  </head>
+    <body>
+    <div hidden id="room">$room</div>
+      <br />
+    <div class="container">
+<div class="chat left">
+    <ul id="playerBox"></ul>
+</div>
+    <div id="roleBox" class="chat mid">
+    </div>
+<div id="messagediv" class="chat right">
+    <ul id="messages"></ul>
+</div>
+</div>
+<div>
+<form action="" id="chatform">
+    <input id="m" autocomplete="off" /><button>Send</button>
+</form>
+</div>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<script src="/common.js"></script>
+<script>
+    $(function () {
+	var socket = new WebSocket("ws://mafia.tapioca.world/ws:8080");
+	var name = readCookie("name");
+	var names = {}
+	var room = $('#room').innerText;
+	socket.onopen = announceSelf;
+	socket.onmessage = onMessage;
+	socket.onclose= onClose;
+
+	function announceSelf() {
+	    socket.send("NAME " + name); // TODO technically a race condition
+	    socket.send("JOIN " + room_n);
+	}
+
+	$('form').submit(function(){
+            var message = $('#m').val().trim();
+            if(message.length === 0) return false; //don't send empty messages
+	    socket.send("MSG " + message);
+	    // DEBUG COMMANDS
+	    if (message == "/START") socket.send("STARTGAME");
+	    $('#m').val('');
+	    return false;
+	});
+
+
+	function onMessage(msg) {
+	    // unimplemented: VLIST, HOST
+	    var tokens = msg.split(' ');
+	    if (tokens[0] == "MSG") {
+		var sc = 0, i = 0;
+		while (sc < 2) if (msg.charAt(i++) == ' ') sc++;
+		chatMessage(parseInt(tokens[1]), msg.substring(i));
+	    }
+	    else if (tokens[0] == "SYS") {
+		var sc = 0, i = 0;
+		while (sc == 0) if (msg.charAt(i++) == ' ') sc++;
+		sysMessage(msg.substring(i));
+	    }
+	    else if (tokens[0] == "VOTE") {
+		var voterN = parseInt(tokens[1]);
+		var votedN = parseIn(tokens[2]);
+		var voter = names[voterN];
+		if (votedN != -2) {
+		    var voted = names[parseInt(tokens[2])];
+		    sysMessage(voter + " votes for " + voted);
+		}
+		else {
+		    sysMessage(voter + " unvotes");
+		}
+	    }
+	    else if (tokens[0] == "CHAT") {
+		$('#messages').innerHTML = ""; // clear messages (TODO actually have logs)
+	    }
+	    else if (tokens[0] == "JOIN") {
+		names[parseInt(tokens[2])] = tokens[1];
+	    }
+	}
+
+	function chatMessage(n, msg) {
+	    var name = names[n];
+	    $('#messages').append('<li><b>'+name+':</b> '+msg+'</li>');
+	    var objDiv = document.getElementById("messagediv");
+	    objDiv.scrollTop = objDiv.scrollHeight;
+	}
+
+	function sysMessage(msg) {
+	    $('#messages').append('<li style="Color:red;">'+msg+"</li>");
+	}
+	
+    });
+</script>
+</body>
+</html>
+    

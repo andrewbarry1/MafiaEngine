@@ -20,6 +20,8 @@ class MafiaRoom:
             new_player.sendMessage("HOST")
         for player in self.players:
             player.sendMessage("JOIN " + new_player.name + " " + str(new_player.player_number))
+            if player is not new_player:
+                new_player.sendMessage("JOIN " + new_player.name + " " + str(player.player_number))
         return False
 
     # remove player from room (quit)
@@ -41,7 +43,7 @@ class MafiaRoom:
             sender.ready = True
             check_advance_time()
         elif (command == "MSG"):
-            self.msg(params, sender.chat_number, self.alive)
+            self.msg(sender.player_number, params, sender.chat_number)
         elif (command == "VOTE"):
             sender.vote(int(params))
             check_advance_time()
@@ -60,9 +62,9 @@ class MafiaRoom:
                 
     def gen_vote_list(self, vt):
         if (vt == "all"):
-            return "VOTE " + " ".join([str(p.player_number) for p in self.players if p.alive])
+            return "VLIST " + " ".join([str(p.player_number) for p in self.players if p.alive])
         elif (vt == "not mafia"):
-            return "VOTE " + " ".join([str(p.player_number) for p in self.players if p.alive and not(p.alignment == Alignment.mafia)])
+            return "VLIST " + " ".join([str(p.player_number) for p in self.players if p.alive and not(p.alignment == Alignment.mafia)])
         else:
             return [] # cult stuff, masons, etc can go here
             
@@ -127,12 +129,12 @@ class MafiaRoom:
             
 
     # send message to other people in this chat (day, maf night, town night, etc)
-    def msg(self, message, chat_number, alive):
-        if chat_number == -1:
+    def msg(self, s_n, message, chat_number):
+        if chat_number == Meeting.none:
             return
         else:
             for player in [p for p in self.players if p.chat_number == chat_number or not p.alive]:
-                player.sendMessage("MSG " + message)
+                player.sendMessage("MSG " + str(s_n) + " " + message)
                 
     def vote(self, voter_n, chat_n, target_n):
         if chat_n == -1:
