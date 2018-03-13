@@ -13,6 +13,8 @@ class MafiaRoom:
 
     # add player to room
     def add_player(self, new_player):
+        if (time >= 0): # game already started
+            return False
         self.players.append(new_player)
         new_player.player_number = len(self.players) - 1
         if len(self.players) == 1:
@@ -22,7 +24,7 @@ class MafiaRoom:
             player.sendMessage("JOIN " + new_player.name + " " + str(new_player.player_number))
             if player is not new_player:
                 new_player.sendMessage("JOIN " + new_player.name + " " + str(player.player_number))
-        return False
+        return True
 
     # remove player from room (quit)
     def del_player(self, old_player):

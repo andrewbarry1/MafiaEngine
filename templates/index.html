@@ -1,0 +1,48 @@
+<html>
+	<head>
+		<title>Mafia Frontpage</title>
+	</head>
+	<body>
+	  <center><h1>Tapioca Mafia</h1></center>
+    <p>Please set your name here and click the big button. Youll be able to create games after that. For simplicity, I suggest the same name you use in Discord/EM!</p>
+    
+	  <input type="text" id="name">
+    <button type="buton" onclick="setName()">Set Name</button>
+
+<button disabled onclick="newGame()" id="makebutton">Start New Game</button>
+          <script src="static/js/common.js"></script>
+	  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+    console.log("hi");
+$$(document).ready(function() {
+    var na = readCookie("name");
+    console.log("hiii");
+    if (na == null) {
+	$$('#makebutton').prop('disabled', true);
+    }
+    else {
+	$$('#makebutton').prop('disabled', false);
+	$$('#name').val(na);
+    }
+});
+
+function newGame()
+{
+    // TODO uhhhh (see server.py)
+}
+    
+
+function setName() {
+    var name = $$('#name').val();
+    var expiration_date = new Date();
+    var cookie_string = '';
+    expiration_date.setFullYear(expiration_date.getFullYear() + 10);
+    cookie_string = "name=" + name + "; path=/; expires=" + expiration_date.toUTCString();
+    document.cookie = cookie_string;
+    
+    $$('#makebutton').prop('disabled', false);
+}
+	  </script>
+	  
+	</body>
+</html>

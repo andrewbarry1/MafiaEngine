@@ -39,6 +39,8 @@ class MafiaPlayer(WebSocketServerProtocol):
                         sendMessage("JOIN " + self.name)
                     else:
                         sendMessage("ERROR")
+                else:
+                    
             except: # not a number, no number, etc
                 sendMessage("ERROR")
 
@@ -97,4 +99,5 @@ if __name__ == '__main__':
 
 
     # DEBUG create room
+    # TODO how do you create a room from the website (ws connect to this server and use a MAKEROOM command?
     rooms[0] = MafiaRoom([Role(), Role(), Mafia()]) # basic 3 man
