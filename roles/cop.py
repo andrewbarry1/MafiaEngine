@@ -1,9 +1,9 @@
+from visit import Visit
 from role import Role
 from enums import *
 class Cop(Role):
 
     def __init__(self):
-        super().__init__()
         self.name = "Cop"
         self.alignment = Alignment.town
         self.night_chat = Meeting.none
@@ -32,8 +32,8 @@ class Cop(Role):
         if mc or mt == VOTE_NL: # tied vote or no one
             return []
         else:
-            return [Visit(self.player.player_number, mt, invest, VisitPriority.Most)]
-    def save(self, visitor, visited):
+            return [Visit(self.player.player_number, mt, self.invest, VisitPriority.Most)]
+    def invest(self, visitor, visited):
         t_align = "the town."
         pname = self.room.players[visited].name
         if self.room.players[visited].alignment == 1:

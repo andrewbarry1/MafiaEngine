@@ -17,8 +17,15 @@ $(function () {
         var message = $('#m').val().trim();
         if(message.length === 0) return false; //don't send empty messages
 	socket.send("MSG " + message);
+
+	
 	// DEBUG COMMANDS
 	if (message == "/START") socket.send("STARTGAME");
+	else if (message.startsWith("/VOTE"))
+	    for (var k in names)
+		if (names.hasOwnProperty(k) && message.split(" ")[1] == names[k])
+		    socket.send("VOTE " + k);
+	
 	$('#m').val('');
 	return false;
     });
@@ -41,7 +48,7 @@ $(function () {
 	}
 	else if (tokens[0] == "VOTE") {
 	    var voterN = parseInt(tokens[1]);
-	    var votedN = parseIn(tokens[2]);
+	    var votedN = parseInt(tokens[2]);
 	    var voter = names[voterN];
 	    if (votedN != -2) {
 		var voted = names[parseInt(tokens[2])];
@@ -52,7 +59,8 @@ $(function () {
 	    }
 	}
 	else if (tokens[0] == "CHAT") {
-	    $('#messages').html(""); // clear messages (TODO actually have logs)
+	    //$('#messages').html(""); // TODO lol
+	    $('#messages').append('<li class="sys">________________________</li>');
 	}
 	else if (tokens[0] == "JOIN") {
 	    names[parseInt(tokens[2])] = tokens[1];
@@ -82,7 +90,7 @@ $(function () {
     }
     
     function sysMessage(msg) {
-	$('#messages').append('<li style="Color:red;">'+msg+"</li>");
+	$('#messages').append('<li class="sys">'+msg+"</li>");
 	var objDiv = document.getElementById("messagediv");
 	objDiv.scrollTop = objDiv.scrollHeight;			    
     }

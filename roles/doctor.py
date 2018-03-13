@@ -1,9 +1,9 @@
 from role import Role
+from visit import Visit
 from enums import *
 class Doctor(Role):
 
     def __init__(self):
-        super().__init__()
         self.name = "Doctor"
         self.alignment = Alignment.town
         self.night_chat = Meeting.none
@@ -31,6 +31,6 @@ class Doctor(Role):
         if mc or mt == VOTE_NL: # tied vote or no one
             return []
         else:
-            return [Visit(self.player.player_number, mt, save, VisitPriority.Save)]
+            return [Visit(self.player.player_number, mt, self.save, VisitPriority.Save)]
     def save(self, visitor, visited):
         self.room.players[visited].evars.append("save")

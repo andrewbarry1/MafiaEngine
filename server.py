@@ -2,6 +2,7 @@ from twisted.python import log
 from twisted.internet import reactor
 from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.twisted.websocket import WebSocketServerFactory
+from roles.visit import Visit
 from roles.role import Role
 from roles.mafia import Mafia
 from roles.enums import *
@@ -21,6 +22,7 @@ class MafiaPlayer(WebSocketServerProtocol):
         self.vote = VOTE_NL
         self.evars = []
         self.host = False
+        self.ready = False
         
     def onMessage(self, payload, isBinary):
         if (isBinary):
@@ -58,18 +60,20 @@ class MafiaPlayer(WebSocketServerProtocol):
         else: # no room
             self.sendMessage("ERROR")
         
-    def vote(self, vote_n):
+    def voteFor(self, vote_n, announce):
         if (vote_n == self.vote): # unvote
             self.vote = -2
             self.ready = False
         else:
             self.vote = vote_n
             self.ready = True
-        self.room.vote(self.player_number, self.chat_number, vote_n)
+        self.room.vote(self.player_number, self.chat_number, vote_n, announce)
 
     def kill(self):
-        if "save" not in evars:
+        if "save" not in self.evars:
             self.alive = False
+            for player in self.room.players:
+                player.sys(self.name + ", the " + self.role.name + ", is dead.")
 
     def setMeeting(self, meet_n):
         self.chat_number = meet_n
@@ -79,7 +83,7 @@ class MafiaPlayer(WebSocketServerProtocol):
     def sys(self, msg):
         self.sendMessage("SYS " + msg)
 
-    def ready(self): # check if voted and actions are done
+    def isReady(self): # check if voted and actions are done
         return self.ready and self.role.ready
 
     def onOpen(self):

@@ -37,3 +37,10 @@
 .number {
     width: 25px;
 }
+
+.sys {
+    color: red;
+}
+.dead {
+    color: blue;
+}
