@@ -4,7 +4,7 @@
 import web, os, time, re, random
 
 
-web.config.debug = False
+web.config.debug = True
 
 base = "/var/www/mafia/"
 

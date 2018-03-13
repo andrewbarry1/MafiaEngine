@@ -6,6 +6,7 @@ class MafiaRoom:
     setup = None
     time = -1
     visits = []
+    pcounter = 0
     
     def __init__(self, setup):
         self.players = [] # MafiaPlayer objects
@@ -13,26 +14,27 @@ class MafiaRoom:
 
     # add player to room
     def add_player(self, new_player):
-        if (time >= 0): # game already started
+        if (self.time >= 0): # game already started
             return False
         self.players.append(new_player)
-        new_player.player_number = len(self.players) - 1
+        new_player.player_number = self.pcounter
+        self.pcounter += 1
         if len(self.players) == 1:
             new_player.host = True
             new_player.sendMessage("HOST")
         for player in self.players:
             player.sendMessage("JOIN " + new_player.name + " " + str(new_player.player_number))
             if player is not new_player:
-                new_player.sendMessage("JOIN " + new_player.name + " " + str(player.player_number))
+                new_player.sendMessage("JOIN " + player.name + " " + str(player.player_number))
         return True
 
     # remove player from room (quit)
     def del_player(self, old_player):
         # game hasn't started yet, just remove player from room
-        if (time == -1):
+        if (self.time == -1):
             self.players.remove(old_player)
             for player in self.players:
-                player.sendMessage("QUIT " + old_player.player_number)
+                player.sendMessage("QUIT " + str(old_player.player_number))
             if old_player.host and len(self.players) > 0:
                 self.players[0].host = True
                 self.players[0].sendMessage("HOST")
@@ -43,24 +45,24 @@ class MafiaRoom:
     def command(self, sender, command, params):
         if (command == "READY"):
             sender.ready = True
-            check_advance_time()
+            self.check_advance_time()
         elif (command == "MSG"):
             self.msg(sender.player_number, params, sender.chat_number)
         elif (command == "VOTE"):
             sender.vote(int(params))
-            check_advance_time()
+            self.check_advance_time()
         elif (command == "ACTION"):
             sender.role.action(params)
-            check_advance_time()
+            self.check_advance_time()
         elif (command == "ADDROLE"):
-            if (sender.host and time == -1):
-                add_role(params)
+            if (sender.host and self.time == -1):
+                self.add_role(params)
         elif (command == "DELROLE"):
-            if (sender.host and time == -1):
-                del_role(params)
+            if (sender.host and self.time == -1):
+                self.del_role(params)
         elif (command == "STARTGAME"):
-            if (sender.host and time == -1 and len(self.players) == len(self.setup)):
-                advance_time()
+            if (sender.host and self.time == -1 and len(self.players) == len(self.setup)):
+                self.advance_time()
                 
     def gen_vote_list(self, vt):
         if (vt == "all"):
@@ -69,7 +71,7 @@ class MafiaRoom:
             return "VLIST " + " ".join([str(p.player_number) for p in self.players if p.alive and not(p.alignment == Alignment.mafia)])
         else:
             return [] # cult stuff, masons, etc can go here
-            
+        
 
     def check_advance_time(self):
         advance_day = True
@@ -77,17 +79,17 @@ class MafiaRoom:
             if not(player.ready()):
                 advance_day = False
         if (advance_day):
-            advance_time()
+            self.advance_time()
 
 
     def advance_time(self): # entire game cycle basically
-        time += 1
-        if (time == 0): # setup the entire game # TODO I'm probably forgetting something
+        self.time += 1
+        if (self.time == 0): # setup the entire game # TODO I'm probably forgetting something
             random.shuffle(self.setup)
             for i in range(len(self.players)): # randomly assign roles
                 self.players[i].role = self.setup[i]
         
-        if (time % 2 == 0): # moving to night time
+        if (self.time % 2 == 0): # moving to night time
             vote_processor = self.players[0]
             for p in self.players:
                 if (p.day_vote_priority > vote_processor.day_vote_priority):
@@ -102,7 +104,7 @@ class MafiaRoom:
             for p in self.players:
                 p.evars = []
                 
-        elif (time % 2 == 1): # moving to day time
+        elif (self.time % 2 == 1): # moving to day time
             self.visits = []
             voted_chats = []
             for p in self.players: # 1. generate visits
@@ -127,7 +129,7 @@ class MafiaRoom:
                 p.role.get_day_vote()
                 p.evars = []
 
-        check_win()
+        self.check_win()
             
 
     # send message to other people in this chat (day, maf night, town night, etc)

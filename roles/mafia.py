@@ -3,7 +3,6 @@ from enums import *
 class Mafia(Role):
 
     def __init__(self):
-        super().__init__()
         name = "Mafia"
         alignment = Alignment.mafia
         night_chat = Meeting.mafnight
