@@ -1,7 +1,7 @@
 $(function () {
     var socket = new WebSocket("ws://mafia.tapioca.world/ws");
     var name = readCookie("name");
-    var names = {}
+    var players = {}
     var room = parseInt($('#room').text());
     socket.onopen = announceSelf;
     socket.onmessage = onMessage;
@@ -29,8 +29,8 @@ $(function () {
 	    socket.send("VOTE -2");
 	}
 	else if (message.startsWith("/VOTE")) {
-	    for (var k in names)
-		if (names.hasOwnProperty(k) && message.split(" ")[1] == names[k])
+	    for (var k in players)
+		if (players.hasOwnProperty(k) && message.split(" ")[1] == players[k].name)
 		    socket.send("VOTE " + k);
 	}
 	else {
@@ -63,37 +63,61 @@ $(function () {
 	else if (tokens[0] == "VOTE") {
 	    var voterN = parseInt(tokens[1]);
 	    var votedN = parseInt(tokens[2]);
-	    var voter = names[voterN];
+	    var voter = players[voterN].name;
 	    if (votedN == -2) {
 		sysMessage(voter + " unvotes");
+		players[voterN].vote = "";
 	    }
 	    else if (votedN == -1) {
 		sysMessage(voter + " votes for no one.");
+		players[voterN].vote = "no one";
 	    }
 	    else {
-		var voted = names[parseInt(tokens[2])];
+		var voted = players[parseInt(tokens[2])].name;
+		players[voterN].vote = voted;
 		sysMessage(voter + " votes for " + voted);
 	    }
+	    refreshPlayerList();
+	    
 	}
 	else if (tokens[0] == "CHAT") {
 	    //$('#messages').html(""); // TODO lol
+	    for (var n in players) {
+		if (players.hasOwnProperty(n)) {
+		    players[n].vote = "";
+		}
+	    }
 	    $('#messages').append('<li class="sys">________________________</li>');
+	    refreshPlayerList();
+	}
+	else if (tokens[0] == "DEAD") {
+	    players[parseInt(tokens[1])].alive = false;
+	    refreshPlayerList();
 	}
 	else if (tokens[0] == "JOIN") {
-	    names[parseInt(tokens[2])] = tokens[1];
+	    var pn = parseInt(tokens[2]);
+	    players[pn] = {name:tokens[1], vote:"", alive:true};
 	    refreshPlayerList();
 	}
 	else if (tokens[0] == "QUIT") {
-	    delete names[parseInt(tokens[1])];
+	    delete players[parseInt(tokens[1])];
 	    refreshPlayerList();
 	}
     }
 
     function refreshPlayerList() {
 	$('#playerBox').html("");
-	for (var n in names) {
-	    if (names.hasOwnProperty(n)) {
-		$('#playerBox').append("<li>" + names[n] + "</li>");
+	for (var n in players) {
+	    if (players.hasOwnProperty(n)) {
+		var votestr = "";
+		var cstr = "";
+		if (players[n].vote != "") {
+		    votestr = " votes " + players[n].vote;
+		}
+		if (!players[n].alive) {
+		    cstr = " class='dead'";
+		}
+		$('#playerBox').append("<li" + cstr + ">" + players[n].name + votestr + "</li>");
 	    }
 	}
     }
@@ -102,14 +126,14 @@ $(function () {
 
     // TODO roll these into once function
     function chatMessage(n, msg) {
-	var name = names[n];
+	var name = players[n].name;
 	$('#messages').append('<li><b>'+name+':</b> '+msg+'</li>');
 	var objDiv = document.getElementById("messagediv");
 	objDiv.scrollTop = objDiv.scrollHeight;
     }
 
     function deadChatMessage(n, msg) {
-	var name = names[n];
+	var name = players[n].name;
 	$('#messages').append('<li class="dead"><b>'+name+':</b> '+msg+'</li>');
 	var objDiv = document.getElementById("messagediv");
 	objDiv.scrollTop = objDiv.scrollHeight;

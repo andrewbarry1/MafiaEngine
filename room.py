@@ -49,8 +49,9 @@ class MafiaRoom:
         elif (command == "MSG"):
             self.msg(sender, params, sender.chat_number)
         elif (command == "VOTE" and self.ingame):
-            sender.voteFor(int(params), True)
-            self.check_advance_time()
+            if (sender.alive):
+                sender.voteFor(int(params), True)
+                self.check_advance_time()
         elif (command == "ACTION" and self.ingame):
             sender.role.action(params)
             self.check_advance_time()

@@ -63,7 +63,7 @@ class MafiaPlayer(WebSocketServerProtocol):
             self.sendMessage("ERROR")
         
     def voteFor(self, vote_n, announce):
-        if (vote_n == self.vote or vote_n == VOTE_NONE): # unvote
+        if vote_n == VOTE_NONE: # unvote
             self.vote = VOTE_NONE
             self.ready = False
         else:
@@ -72,10 +72,13 @@ class MafiaPlayer(WebSocketServerProtocol):
         self.room.vote(self.player_number, self.chat_number, vote_n, announce)
 
     def kill(self):
+        if not(self.alive):
+            return
         if "save" not in self.evars:
             self.alive = False
             for player in self.room.players.values():
                 player.sys(self.name + ", the " + self.role.name + ", is dead.")
+                player.sendMessage("DEAD " + str(self.player_number))
 
     def setMeeting(self, meet_n):
         self.chat_number = meet_n
