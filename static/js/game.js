@@ -43,7 +43,7 @@ $(function () {
     function onMessage(mesg) {
 	var msg = mesg.data;
 	console.log(msg);
-	// unimplemented: VLIST, HOST, QUIT
+	// unimplemented: HOST
 	var tokens = msg.split(' ');
 	if (tokens[0] == "MSG") {
 	    var sc = 0, i = 0;
@@ -80,8 +80,33 @@ $(function () {
 	    refreshPlayerList();
 	    
 	}
+	else if (tokens[0] == "VLIST") {
+	    if (tokens.length == 1) return; // Nothing to vote for, do not make select
+	    var options = tokens[1].split(',');
+	    var h_str = "<select id='vote'>";
+	    for (var x = 0; x < options.length; x++) {
+		var o = parseInt(options[x]);
+		for (var p in players) {
+		    if (players.hasOwnProperty(p) && o == p) {
+			h_str += "<option value='" + p + "'>" + players[p].name + "</option>";
+		    }
+		}
+	    }
+	    h_str += "<option value='-1'>No one</option>"
+	    h_str += "<option value='-2'> </option>"
+	    h_str += "</select>"
+	    $('#voteSection').html(h_str);
+	    $('#vote').val("-2");
+	    $('#vote').change(function() {
+		$('#vote option:selected').each(function() {
+		    var voting = $(this).val();
+		    socket.send("VOTE " + voting);
+		});
+	    });
+	}
 	else if (tokens[0] == "CHAT") {
-	    //$('#messages').html(""); // TODO lol
+	    //$('#messages').html(""); // TODO tabbed pages for logs?
+	    $('#voteSection').html("");
 	    for (var n in players) {
 		if (players.hasOwnProperty(n)) {
 		    players[n].vote = "";
@@ -92,6 +117,9 @@ $(function () {
 	}
 	else if (tokens[0] == "DEAD") {
 	    players[parseInt(tokens[1])].alive = false;
+	    if (name == players[parseInt(tokens[1])].name) { // it was you
+		$('#voteSection').html("");
+	    }
 	    refreshPlayerList();
 	}
 	else if (tokens[0] == "JOIN") {

@@ -9,7 +9,7 @@ class Doctor(Role):
         self.night_chat = Meeting.doc
 
     def get_night_vote(self):
-        return self.room.gen_vote_list("all")
+        return self.room.gen_vote_list(self.player, "not me")
 
     def process_night_vote(self, votes):
         counts = {}

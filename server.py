@@ -90,7 +90,6 @@ class MafiaPlayer(WebSocketServerProtocol):
 
     def isReady(self): # check if voted and actions are done
         r = (self.ready) and (self.role.ready)
-        if (r): print(self.name + " is ready")
         return r
 
     def onOpen(self):

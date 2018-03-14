@@ -25,7 +25,7 @@ class Role:
         self.player.ready = True
         return "VLIST"
     def get_day_vote(self): # all players
-        return self.room.gen_vote_list("all")
+        return self.room.gen_vote_list(self.player, "all")
 
     def process_night_vote(self, votes):
         return [] # no night vote to process

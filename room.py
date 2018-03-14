@@ -65,13 +65,17 @@ class MafiaRoom:
             if (sender.host and self.time == -1 and len(self.players) == len(self.setup)):
                 self.advance_time()
                 
-    def gen_vote_list(self, vt):
+    def gen_vote_list(self, me, vt):
+        if not(me.alive): # dead people don't vote
+            return "VLIST"
         if (vt == "all"):
-            return "VLIST " + " ".join([str(p.player_number) for p in self.players.values() if p.alive])
+            return "VLIST " + ",".join([str(p.player_number) for p in self.players.values() if p.alive])
         elif (vt == "not mafia"):
-            return "VLIST " + " ".join([str(p.player_number) for p in self.players.values() if p.alive and not(p.role.alignment == Alignment.mafia)])
+            return "VLIST " + ",".join([str(p.player_number) for p in self.players.values() if p.alive and not(p.role.alignment == Alignment.mafia)])
+        elif (vt == "not me"):
+            return "VLIST " + ",".join([str(p.player_number) for p in self.players.values() if p.alive and not(me == p)])
         else:
-            return [] # cult stuff, masons, etc can go here
+            return "VLIST" # cult stuff, masons, etc can go here
         
 
     def check_advance_time(self):
@@ -101,9 +105,9 @@ class MafiaRoom:
 
         if (self.time % 2 == 0): # moving to night time
             votes = [p.vote for p in self.players.values()]
-            vote_processor = self.players.values()[0]
+            vote_processor = self.players.values()[0] # TODO first alive player, not first (!!)
             for p in self.players.values():
-                if (p.role.day_vote_priority > vote_processor.role.day_vote_priority):
+                if (p.role.day_vote_priority >= vote_processor.role.day_vote_priority and p.alive):
                     vote_processor = p
                 if (p.alive):
                     p.setMeeting(p.role.night_chat)
@@ -111,7 +115,7 @@ class MafiaRoom:
                     p.setMeeting(Meeting.dead) # allow dead talking at night
                 p.voteFor(VOTE_NONE, False)
                 p.role.get_night_action()
-                p.role.get_night_vote()
+                p.sendMessage(p.role.get_night_vote())
             v = vote_processor.role.process_day_vote(votes)
             if len(v) > 0:
                 [ve.callback(ve.visitor, ve.visited) for ve in v] # do the lynch + extra
@@ -126,6 +130,8 @@ class MafiaRoom:
             self.visits = []
             voted_chats = []
             for p in self.players.values(): # 1. generate visits
+                if not(p.alive):
+                    continue
                 v = p.role.get_night_visit()
                 self.visits += v
                 if p.role.night_chat not in voted_chats:
@@ -142,9 +148,8 @@ class MafiaRoom:
                 p.setMeeting(Meeting.day)
                 p.voteFor(VOTE_NONE, False)
                 p.role.get_day_action()
-                p.role.get_day_vote()
+                p.sendMessage(p.role.get_day_vote())
             for v in sorted(self.visits): # do all callbacks (correct order)
-                print("Doing a visit " + str(v.priority))
                 v.callback(v.visitor, v.visited)
             for p in self.players.values(): # reset evars now that callbacks are done
                 p.evars = []

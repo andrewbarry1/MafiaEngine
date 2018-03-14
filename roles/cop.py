@@ -9,8 +9,7 @@ class Cop(Role):
         self.night_chat = Meeting.cop
         
     def get_night_vote(self):
-        self.player.ready = False
-        return self.room.gen_vote_list("all")
+        return self.room.gen_vote_list(self.player, "not me")
 
     
     def process_night_vote(self, votes):
