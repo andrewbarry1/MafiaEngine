@@ -104,8 +104,10 @@ class MafiaRoom:
             for p in self.players.values():
                 if (p.role.day_vote_priority > vote_processor.role.day_vote_priority):
                     vote_processor = p
-                if (p.alive): p.setMeeting(p.role.night_chat)
-                else: p.setMeeting(Meeting.dead) # allow dead talking at night
+                if (p.alive):
+                    p.setMeeting(p.role.night_chat)
+                else:
+                    p.setMeeting(Meeting.dead) # allow dead talking at night
                 p.voteFor(VOTE_NONE, False)
                 p.role.get_night_action()
                 p.role.get_night_vote()
@@ -125,7 +127,7 @@ class MafiaRoom:
             for p in self.players.values(): # 1. generate visits
                 v = p.role.get_night_visit()
                 self.visits += v
-                if not(p.role.night_chat == Meeting.none) and p.role.night_chat not in voted_chats:
+                if p.role.night_chat not in voted_chats:
                     votes = [pl.vote for pl in self.players.values() if pl.chat_number == p.chat_number]
                     v2 = p.role.process_night_vote(votes)
                     self.visits += v2
@@ -141,6 +143,7 @@ class MafiaRoom:
                 p.role.get_day_action()
                 p.role.get_day_vote()
             for v in sorted(self.visits): # do all callbacks (correct order)
+                print("Doing a visit " + str(v.priority))
                 v.callback(v.visitor, v.visited)
             for p in self.players.values(): # reset evars now that callbacks are done
                 p.evars = []

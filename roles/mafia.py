@@ -9,7 +9,6 @@ class Mafia(Role):
         self.night_chat = Meeting.mafnight
 
     def get_night_vote(self):
-        self.ready = True
         vlist = self.room.gen_vote_list("not mafia")
         self.player.sendMessage(vlist)
 

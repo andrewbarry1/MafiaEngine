@@ -28,7 +28,7 @@ class Role:
         return self.room.gen_vote_list("all")
 
     def process_night_vote(self, votes):
-        return None # no night vote to process
+        return [] # no night vote to process
     def process_day_vote(self, votes): # process day vote (lynch, shared by all roles)
         counts = {}
         for v in votes:

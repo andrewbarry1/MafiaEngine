@@ -5,6 +5,8 @@ from autobahn.twisted.websocket import WebSocketServerFactory
 from roles.visit import Visit
 from roles.role import Role
 from roles.mafia import Mafia
+from roles.cop import Cop
+from roles.doctor import Doctor
 from roles.enums import *
 from room import MafiaRoom
 rooms = {}
@@ -61,8 +63,8 @@ class MafiaPlayer(WebSocketServerProtocol):
             self.sendMessage("ERROR")
         
     def voteFor(self, vote_n, announce):
-        if (vote_n == self.vote or vote_n == -2): # unvote
-            self.vote = -2
+        if (vote_n == self.vote or vote_n == VOTE_NONE): # unvote
+            self.vote = VOTE_NONE
             self.ready = False
         else:
             self.vote = vote_n
@@ -84,7 +86,9 @@ class MafiaPlayer(WebSocketServerProtocol):
         self.sendMessage("SYS " + msg)
 
     def isReady(self): # check if voted and actions are done
-        return self.ready and self.role.ready
+        r = (self.ready) and (self.role.ready)
+        if (r): print(self.name + " is ready")
+        return r
 
     def onOpen(self):
         self.room = None
@@ -99,7 +103,7 @@ class MafiaPlayer(WebSocketServerProtocol):
 if __name__ == '__main__':
     # DEBUG create room
     # TODO how do you create a room from the website (ws connect to this server and use a MAKEROOM command?
-    rooms[0] = MafiaRoom([Role(), Role(), Role(), Mafia()])
+    rooms[0] = MafiaRoom([Role(), Doctor(), Cop(), Mafia()])
 
 
     

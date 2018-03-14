@@ -6,6 +6,8 @@ class Meeting(Enum):
     day = 1
     mafnight = 2
     dead = 3
+    cop = 4
+    doc = 5 # TODO redo voting so you don't need to share meeting to vote (give doc/cop Meeting.none)
     # mason, templar, etc go here
     
 class Alignment(Enum):

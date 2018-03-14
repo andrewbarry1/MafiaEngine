@@ -6,7 +6,7 @@ class Doctor(Role):
     def __init__(self):
         self.name = "Doctor"
         self.alignment = Alignment.town
-        self.night_chat = Meeting.none
+        self.night_chat = Meeting.doc
 
     def get_night_vote(self):
         return self.room.gen_vote_list("all")
