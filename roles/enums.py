@@ -5,6 +5,7 @@ class Meeting(Enum):
     none = 0
     day = 1
     mafnight = 2
+    dead = 3
     # mason, templar, etc go here
     
 class Alignment(Enum):

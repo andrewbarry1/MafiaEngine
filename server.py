@@ -51,7 +51,7 @@ class MafiaPlayer(WebSocketServerProtocol):
         elif (command == "NAME"): # set name
             try:
                 self.name = tokens[1]
-                self.player_number = int(tokens[2])
+                # self.player_number = int(tokens[2])
             except:
                 pass
 
@@ -72,7 +72,7 @@ class MafiaPlayer(WebSocketServerProtocol):
     def kill(self):
         if "save" not in self.evars:
             self.alive = False
-            for player in self.room.players:
+            for player in self.room.players.values():
                 player.sys(self.name + ", the " + self.role.name + ", is dead.")
 
     def setMeeting(self, meet_n):
@@ -99,7 +99,7 @@ class MafiaPlayer(WebSocketServerProtocol):
 if __name__ == '__main__':
     # DEBUG create room
     # TODO how do you create a room from the website (ws connect to this server and use a MAKEROOM command?
-    rooms[0] = MafiaRoom([Role(), Role(), Mafia()]) # basic 3 man
+    rooms[0] = MafiaRoom([Role(), Role(), Role(), Mafia()])
 
 
     
