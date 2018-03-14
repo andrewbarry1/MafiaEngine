@@ -3,6 +3,10 @@ $(function () {
     var name = readCookie("name");
     var players = {}
     var room = parseInt($('#room').text());
+    var time = -1;
+    var useRealName = true;
+    var id_order = []
+    
     socket.onopen = announceSelf;
     socket.onmessage = onMessage;
     socket.onclose= onClose;
@@ -43,7 +47,6 @@ $(function () {
     function onMessage(mesg) {
 	var msg = mesg.data;
 	console.log(msg);
-	// unimplemented: HOST
 	var tokens = msg.split(' ');
 	if (tokens[0] == "MSG") {
 	    var sc = 0, i = 0;
@@ -63,7 +66,7 @@ $(function () {
 	else if (tokens[0] == "VOTE") {
 	    var voterN = parseInt(tokens[1]);
 	    var votedN = parseInt(tokens[2]);
-	    var voter = players[voterN].name;
+	    var voter = players[voterN].dname;
 	    if (votedN == -2) {
 		sysMessage(voter + " unvotes");
 		players[voterN].vote = "";
@@ -73,14 +76,14 @@ $(function () {
 		players[voterN].vote = "no one";
 	    }
 	    else {
-		var voted = players[parseInt(tokens[2])].name;
+		var voted = players[parseInt(tokens[2])].dname;
 		players[voterN].vote = voted;
 		sysMessage(voter + " votes for " + voted);
 	    }
 	    refreshPlayerList();
 	    
 	}
-	else if (tokens[0] == "VLIST") {
+	else if (tokens[0] == "VLIST") { // TODO alphabetize vote list
 	    if (tokens.length == 1) return; // Nothing to vote for, do not make select
 	    var options = tokens[1].split(',');
 	    var h_str = "<select id='vote'>";
@@ -88,7 +91,7 @@ $(function () {
 		var o = parseInt(options[x]);
 		for (var p in players) {
 		    if (players.hasOwnProperty(p) && o == p) {
-			h_str += "<option value='" + p + "'>" + players[p].name + "</option>";
+			h_str += "<option value='" + p + "'>" + players[p].dname + "</option>";
 		    }
 		}
 	    }
@@ -112,7 +115,13 @@ $(function () {
 		    players[n].vote = "";
 		}
 	    }
-	    $('#messages').append('<li class="sys">________________________</li>');
+	    time += 1;
+	    var timestr = "";
+	    if (time % 2 == 0) timestr = "Night ";
+	    else timestr = "Day ";
+	    timestr += (Math.floor(time / 2) + 1);
+	    $('#messages').append('<li class="sys">_______________________________' + timestr + '______________________________</li>');
+	    useRealName = false; // use deck names during the game
 	    refreshPlayerList();
 	}
 	else if (tokens[0] == "DEAD") {
@@ -122,46 +131,90 @@ $(function () {
 	    }
 	    refreshPlayerList();
 	}
-	else if (tokens[0] == "JOIN") {
-	    var pn = parseInt(tokens[2]);
-	    players[pn] = {name:tokens[1], vote:"", alive:true};
+	else if (tokens[0] == "NAME") { // rename player.
+	    players[parseInt(tokens[1])].dname = tokens[2];
+	    useRealName = false;
+	    shufflePlayers();
 	    refreshPlayerList();
 	}
-	else if (tokens[0] == "QUIT") {
-	    delete players[parseInt(tokens[1])];
+	else if (tokens[0] == "REVEAL") {
+	    useRealName = true;
 	    refreshPlayerList();
+	}
+	else if (tokens[0] == "JOIN") {
+	    var pn = parseInt(tokens[2]);
+	    players[pn] = {name:tokens[1], dname:tokens[1], vote:"", alive:true, id:pn};
+	    id_order.push(pn);
+	    refreshPlayerList();
+	}
+	else if (tokens[0] == "HOST") {
+	    sysMessage("You are now the host.");
+	    $('#voteSection').html("<button id='startButton'>Start Game</button>");
+	    $('#startButton').click(function() {
+		socket.send("STARTGAME");
+	    });
+	}
+	else if (tokens[0] == "QUIT") {
+	    var pn = parseInt(tokens[1]);
+	    delete players[pn];
+	    id_order.splice(id_order.indexOf(pn), 1);
+	    refreshPlayerList();
+	}
+    }
+
+    function shufflePlayers() {
+	for (let i = id_order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [id_order[i], id_order[j]] = [id_order[j], id_order[i]];
 	}
     }
 
     function refreshPlayerList() {
 	$('#playerBox').html("");
-	for (var n in players) {
-	    if (players.hasOwnProperty(n)) {
-		var votestr = "";
-		var cstr = "";
-		if (players[n].vote != "") {
-		    votestr = " votes " + players[n].vote;
-		}
-		if (!players[n].alive) {
-		    cstr = " class='dead'";
-		}
-		$('#playerBox').append("<li" + cstr + ">" + players[n].name + votestr + "</li>");
+	console.log("REFRESHING")
+	for (var x = 0; x < id_order.length; x++) {
+	    var n = id_order[x];
+	    var votestr = "";
+	    var cstr = "";
+	    if (players[n].vote != "") {
+		votestr = " votes " + players[n].vote;
 	    }
+	    if (!players[n].alive) {
+		cstr = " class='dead'";
+	    }
+	    var namestr = players[n].dname;
+	    if (useRealName && players[n].name == players[n].dname) {
+		namestr = players[n].name;
+	    }
+	    else if (useRealName) {
+		namestr = players[n].dname + "(" + players[n].name + ")";
+	    }
+
+	    var build = namestr + votestr;
+	    if (players[n].name == name) {
+		build = "<u>" + build + "</u>";
+	    }
+	    $('#playerBox').append("<li" + cstr + ">" + build + "</li>");
 	}
     }
     
-    function onClose() { /* TODO */ }
+    function onClose() {
+	sysMessage("Connection to server lost. :(");
+    }
 
     // TODO roll these into once function
     function chatMessage(n, msg) {
-	var name = players[n].name;
+	var name = players[n].dname;
+	if (useRealName) {
+	    name = players[n].name;
+	}
 	$('#messages').append('<li><b>'+name+':</b> '+msg+'</li>');
 	var objDiv = document.getElementById("messagediv");
 	objDiv.scrollTop = objDiv.scrollHeight;
     }
 
     function deadChatMessage(n, msg) {
-	var name = players[n].name;
+	var name = players[n].dname;
 	$('#messages').append('<li class="dead"><b>'+name+':</b> '+msg+'</li>');
 	var objDiv = document.getElementById("messagediv");
 	objDiv.scrollTop = objDiv.scrollHeight;

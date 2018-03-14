@@ -16,6 +16,7 @@ rooms = {}
 class MafiaPlayer(WebSocketServerProtocol):
     def __init__(self): # new player
         self.name = "--"
+        self.dname = "--"
         self.room = None
         self.role = None
         self.chat_number = Meeting.pregame
@@ -77,7 +78,7 @@ class MafiaPlayer(WebSocketServerProtocol):
         if "save" not in self.evars:
             self.alive = False
             for player in self.room.players.values():
-                player.sys(self.name + ", the " + self.role.name + ", is dead.")
+                player.sys(self.dname + ", the " + self.role.name + ", is dead.")
                 player.sendMessage("DEAD " + str(self.player_number))
 
     def setMeeting(self, meet_n):
@@ -105,7 +106,7 @@ class MafiaPlayer(WebSocketServerProtocol):
 if __name__ == '__main__':
     # DEBUG create room
     # TODO how do you create a room from the website (ws connect to this server and use a MAKEROOM command?
-    rooms[0] = MafiaRoom([Role(), Doctor(), Cop(), Mafia()])
+    rooms[0] = MafiaRoom([Role(), Role(), Role(), Doctor(), Cop(), Mafia(), Mafia()], "dkc.txt")
 
 
     

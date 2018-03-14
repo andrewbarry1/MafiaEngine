@@ -8,9 +8,14 @@ class MafiaRoom:
     pcounter = 0
     ingame = False
     
-    def __init__(self, setup):
+    def __init__(self, setup, deck):
         self.players = {} # MafiaPlayer objects
         self.setup = setup
+        
+        f = open("static/deck/" + deck, 'r')
+        self.deck = f.readlines()
+        random.shuffle(self.deck)
+        f.close()
 
     # add player to room
     def add_player(self, new_player):
@@ -63,7 +68,8 @@ class MafiaRoom:
                 self.del_role(params)
         elif (command == "STARTGAME" and not self.ingame):
             if (sender.host and self.time == -1 and len(self.players) == len(self.setup)):
-                self.advance_time()
+                if len(self.players) <= len(self.deck):
+                    self.advance_time()
                 
     def gen_vote_list(self, me, vt):
         if not(me.alive): # dead people don't vote
@@ -89,22 +95,26 @@ class MafiaRoom:
 
     def advance_time(self): # entire game cycle basically
         self.time += 1
-        if (self.time == 0): # setup the entire game # TODO I'm probably forgetting something
+        if (self.time == 0): # setup the entire game
             self.ingame = True
             random.shuffle(self.setup)
             c = 0
             for i in self.players: # randomly assign roles
                 self.players[i].role = self.setup[c]
+                self.players[i].dname = self.deck[c]
                 self.setup[c].player = self.players[i]
                 self.setup[c].room = self
                 self.players[i].sys("You are the " + self.setup[c].name + ".")
                 c += 1
+            for i in self.players:
+                for it in self.players:
+                    self.players[i].sendMessage("NAME " + str(self.players[it].player_number) + " " + self.players[it].dname)
 
 
 
 
         if (self.time % 2 == 0): # moving to night time
-            votes = [p.vote for p in self.players.values()]
+            votes = [p.vote for p in self.players.values() if p.alive]
             vote_processor = self.players.values()[0] # TODO first alive player, not first (!!)
             for p in self.players.values():
                 if (p.role.day_vote_priority >= vote_processor.role.day_vote_priority and p.alive):
@@ -135,7 +145,7 @@ class MafiaRoom:
                 v = p.role.get_night_visit()
                 self.visits += v
                 if p.role.night_chat not in voted_chats:
-                    votes = [pl.vote for pl in self.players.values() if pl.chat_number == p.chat_number]
+                    votes = [pl.vote for pl in self.players.values() if pl.chat_number == p.chat_number and p.alive]
                     v2 = p.role.process_night_vote(votes)
                     self.visits += v2
                     voted_chats.append(p.role.night_chat)
@@ -199,6 +209,7 @@ class MafiaRoom:
                 p.alive = True
                 ingame = False
                 p.sys(win_str)
+                p.sendMessage("REVEAL")
 
 
     # TODO come up with a way that's actually scalable
