@@ -51,7 +51,7 @@ class Role:
         else:
             return [Visit(self.player.player_number, mt, self.lynch, VisitPriority.Vote)]
     def lynch(self, visitor, visited):
-        self.room.players[visited].alive = False
+        self.room.players[visited].kill()
 
     def get_night_visit(self):
         return []

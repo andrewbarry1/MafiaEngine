@@ -27,7 +27,7 @@ class MafiaPlayer(WebSocketServerProtocol):
     def onMessage(self, payload, isBinary):
         if (isBinary):
             payload = payload.encode()
-        print(payload)
+        print(str(self.player_number) + " " + payload)
         
         tokens = payload.split(" ")
         command = tokens[0]
@@ -61,7 +61,7 @@ class MafiaPlayer(WebSocketServerProtocol):
             self.sendMessage("ERROR")
         
     def voteFor(self, vote_n, announce):
-        if (vote_n == self.vote): # unvote
+        if (vote_n == self.vote or vote_n == -2): # unvote
             self.vote = -2
             self.ready = False
         else:

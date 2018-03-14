@@ -92,6 +92,10 @@ class MafiaRoom:
                 self.setup[i].player = self.players[i]
                 self.setup[i].room = self
                 self.players[i].sys("You are the " + self.setup[i].name + ".")
+
+
+
+
         if (self.time % 2 == 0): # moving to night time
             votes = [p.vote for p in self.players]
             vote_processor = self.players[0]
@@ -104,9 +108,13 @@ class MafiaRoom:
                 p.role.get_night_vote()
             v = vote_processor.role.process_day_vote(votes)
             if len(v) > 0:
-                [ve.callback(v.visitor, v.visited) for ve in v] # do the lynch + extra
+                [ve.callback(ve.visitor, ve.visited) for ve in v] # do the lynch + extra
             for p in self.players:
                 p.evars = []
+
+
+
+
                 
         elif (self.time % 2 == 1): # moving to day time
             self.visits = []
@@ -123,15 +131,17 @@ class MafiaRoom:
             priority for night visits is this:
             1. Maf RBs 2. Town RBs 3. All role conversions 4. Everything else 5. Votes
             '''
-            for v in sorted(self.visits): # 2. do all visits in priority order
-                v.callback(v.visitor, v.visited)
-            # 3. reset everything, dump them all into town chat
+            # reset everything but evars, dump them all into town chat
             for p in self.players:
                 p.setMeeting(Meeting.day)
                 p.voteFor(VOTE_NONE, False)
                 p.role.get_day_action()
                 p.role.get_day_vote()
+            for v in sorted(self.visits): # do all callbacks (correct order)
+                v.callback(v.visitor, v.visited)
+            for p in self.players: # reset evars now that callbacks are done
                 p.evars = []
+                
 
         self.check_win()
             
@@ -148,7 +158,7 @@ class MafiaRoom:
                 player.sendMessage("MSG " + str(s_n) + " " + message)
         else: # dead chat
             for player in [p for p in self.players if not p.alive]:
-                player.sendMessage("MSG " + str(s_n) + " " + message)
+                player.sendMessage("DEADMSG " + str(s_n) + " " + message)
                 
     def vote(self, voter_n, chat_n, target_n, announce):
         if chat_n == -1 or not(self.ingame):

@@ -16,17 +16,26 @@ $(function () {
     $('form').submit(function(){
         var message = $('#m').val().trim();
         if(message.length === 0) return false; //don't send empty messages
-	socket.send("MSG " + message);
-
+	$('#m').val('');
 	
 	// DEBUG COMMANDS
-	if (message == "/START") socket.send("STARTGAME");
-	else if (message.startsWith("/VOTE"))
+	if (message == "/START") {
+	    socket.send("STARTGAME");
+	}
+	else if (message.startsWith("/VOTENL")) {
+	    socket.send("VOTE -1");
+	}
+	else if (message.startsWith("/UNVOTE")) {
+	    socket.send("VOTE -2");
+	}
+	else if (message.startsWith("/VOTE")) {
 	    for (var k in names)
 		if (names.hasOwnProperty(k) && message.split(" ")[1] == names[k])
 		    socket.send("VOTE " + k);
-	
-	$('#m').val('');
+	}
+	else {
+	    socket.send("MSG " + message);
+	}
 	return false;
     });
     
@@ -41,6 +50,11 @@ $(function () {
 	    while (sc < 2) if (msg.charAt(i++) == ' ') sc++;
 	    chatMessage(parseInt(tokens[1]), msg.substring(i));
 	}
+	else if (tokens[0] == "DEADMSG") {
+	    var sc = 0, i = 0;
+	    while (sc < 2) if (msg.charAt(i++) == ' ') sc++;
+	    deadChatMessage(parseInt(tokens[1]), msg.substring(i));
+	}
 	else if (tokens[0] == "SYS") {
 	    var sc = 0, i = 0;
 	    while (sc == 0) if (msg.charAt(i++) == ' ') sc++;
@@ -50,12 +64,15 @@ $(function () {
 	    var voterN = parseInt(tokens[1]);
 	    var votedN = parseInt(tokens[2]);
 	    var voter = names[voterN];
-	    if (votedN != -2) {
-		var voted = names[parseInt(tokens[2])];
-		sysMessage(voter + " votes for " + voted);
+	    if (votedN == -2) {
+		sysMessage(voter + " unvotes");
+	    }
+	    else if (votedN == -1) {
+		sysMessage(voter + " votes for no one.");
 	    }
 	    else {
-		sysMessage(voter + " unvotes");
+		var voted = names[parseInt(tokens[2])];
+		sysMessage(voter + " votes for " + voted);
 	    }
 	}
 	else if (tokens[0] == "CHAT") {
@@ -82,9 +99,18 @@ $(function () {
     }
     
     function onClose() { /* TODO */ }
+
+    // TODO roll these into once function
     function chatMessage(n, msg) {
 	var name = names[n];
 	$('#messages').append('<li><b>'+name+':</b> '+msg+'</li>');
+	var objDiv = document.getElementById("messagediv");
+	objDiv.scrollTop = objDiv.scrollHeight;
+    }
+
+    function deadChatMessage(n, msg) {
+	var name = names[n];
+	$('#messages').append('<li class="dead"><b>'+name+':</b> '+msg+'</li>');
 	var objDiv = document.getElementById("messagediv");
 	objDiv.scrollTop = objDiv.scrollHeight;
     }
