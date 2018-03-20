@@ -19,4 +19,8 @@ class Doctor(Role):
         else:
             return [Visit(self.player.player_number, target, self.save, VisitPriority.Save)]
     def save(self, visitor, visited):
-        self.room.players[visited].evars.append("save")
+        # implement the save by rewriting all kill visits on the target to nothing
+        # note that the visit still occurs & can be seen by tracker
+        [visit.callback = self.block for visit in self.room.visits if visit.priority == VisitPriority.Kill and visit.visited == visited]
+    def block(self, visitor, visited): # blocked kill events will call this
+        return

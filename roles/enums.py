@@ -21,8 +21,9 @@ class VisitPriority(Enum):
     Save = 3
     RoleConvert = 4
     Most = 5
-    Vote = 6
+    Kill = 6
 
+    
 # some important voting constants
 VOTE_NONE = -2
 VOTE_NL = -1

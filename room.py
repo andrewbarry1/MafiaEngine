@@ -129,8 +129,6 @@ class MafiaRoom:
             v = vote_processor.role.process_day_vote(votes)
             if len(v) > 0:
                 [ve.callback(ve.visitor, ve.visited) for ve in v] # do the lynch + extra
-            for p in self.players.values():
-                p.evars = []
 
 
 
@@ -154,16 +152,14 @@ class MafiaRoom:
             1. Maf RBs 2. Town RBs 3. All role conversions 4. Everything else 5. Votes
             '''
             # reset everything but evars, dump them all into town chat
-            for p in self.players.values():
+            for p in self.players.values(): # set to next day
                 p.setMeeting(Meeting.day)
                 p.voteFor(VOTE_NONE, False)
-                p.role.get_day_action()
-                p.sendMessage(p.role.get_day_vote())
             for v in sorted(self.visits): # do all callbacks (correct order)
                 v.callback(v.visitor, v.visited)
-            for p in self.players.values(): # reset evars now that callbacks are done
-                p.evars = []
-                
+            for p in self.players.values(): # reset evars and send voting list + day action
+                p.sendMessage(p.role.get_day_vote())
+                p.role.get_day_action()
 
         self.check_win()
             

@@ -17,7 +17,7 @@ class Mafia(Role):
         if target == VOTE_NL: # tied vote or nl - same thing
             return []
         else:
-            return [Visit(self.player.player_number, target, self.nightkill, VisitPriority.Vote)]
+            return [Visit(self.player.player_number, target, self.nightkill, VisitPriority.Kill)]
     def nightkill(self, visitor, visited):
         self.room.players[visited].kill()
 

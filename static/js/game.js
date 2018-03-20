@@ -120,7 +120,7 @@ $(function () {
 	    if (time % 2 == 0) timestr = "Night ";
 	    else timestr = "Day ";
 	    timestr += (Math.floor(time / 2) + 1);
-	    $('#messages').append('<li class="sys">_______________________________' + timestr + '______________________________</li>');
+	    $('#messages').append('<li class="sys">_____________________' + timestr + '____________________</li>');
 	    useRealName = false; // use deck names during the game
 	    refreshPlayerList();
 	}
