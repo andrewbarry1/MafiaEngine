@@ -1,6 +1,7 @@
 from role import Role
 from visit import Visit
 from enums import *
+from voting import vote
 class Mafia(Role):
 
     def __init__(self):
@@ -12,26 +13,11 @@ class Mafia(Role):
         return self.room.gen_vote_list(self.player, "not mafia")
 
     def process_night_vote(self, votes):
-        counts = {}
-        for v in votes:
-            if v in counts:
-                counts[v] += 1
-            else:
-                counts[v] = 1
-        max = 0
-        mt = VOTE_NONE
-        mc = False
-        for k in counts:
-            if counts[k] > max:
-                max = counts[k]
-                mt = k
-                mc = False
-            elif counts[k] == max:
-                mc = True
-        if mc or mt == VOTE_NL: # tied vote or nl - same thing
+        (counts, target) = vote(votes)
+        if target == VOTE_NL: # tied vote or nl - same thing
             return []
         else:
-            return [Visit(self.player.player_number, mt, self.nightkill, VisitPriority.Vote)]
+            return [Visit(self.player.player_number, target, self.nightkill, VisitPriority.Vote)]
     def nightkill(self, visitor, visited):
         self.room.players[visited].kill()
 

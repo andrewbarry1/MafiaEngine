@@ -1,6 +1,7 @@
 # base role - Blue Villager
 from visit import Visit
 from enums import *
+from voting import vote
 class Role:
     name = "Villager"
     alignment = Alignment.town
@@ -30,26 +31,11 @@ class Role:
     def process_night_vote(self, votes):
         return [] # no night vote to process
     def process_day_vote(self, votes): # process day vote (lynch, shared by all roles)
-        counts = {}
-        for v in votes:
-            if v in counts:
-                counts[v] += 1
-            else:
-                counts[v] = 1
-        max = 0
-        mt = VOTE_NONE
-        mc = False
-        for k in counts:
-            if counts[k] > max:
-                max = counts[k]
-                mt = k
-                mc = False
-            elif counts[k] == max:
-                mc = True
-        if mc or mt == VOTE_NL: # tied vote or nl - same thing
+        (counts, target) = vote(votes)
+        if target == VOTE_NL: # tied vote or nl - same thing
             return []
         else:
-            return [Visit(self.player.player_number, mt, self.lynch, VisitPriority.Vote)]
+            return [Visit(self.player.player_number, target, self.lynch, VisitPriority.Vote)]
     def lynch(self, visitor, visited):
         self.room.players[visited].kill()
 
