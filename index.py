@@ -1,8 +1,6 @@
 #!/usr/bin/python
 
-
 import web, os, time, re, random
-
 
 web.config.debug = True
 
@@ -16,10 +14,7 @@ urls = (
 app = web.application(urls, globals(), autoreload=True)
 application = app.wsgifunc()
 
-
 render = web.template.render(base + 'templates/')
-
-
 
 class index:
     def GET(self):

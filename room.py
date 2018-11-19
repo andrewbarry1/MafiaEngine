@@ -11,11 +11,6 @@ class MafiaRoom:
     def __init__(self, setup, deck):
         self.players = {} # MafiaPlayer objects
         self.setup = setup
-        
-        f = open("static/deck/" + deck, 'r')
-        self.deck = f.readlines()
-        random.shuffle(self.deck)
-        f.close()
 
     # add player to room
     def add_player(self, new_player):
@@ -101,17 +96,10 @@ class MafiaRoom:
             c = 0
             for i in self.players: # randomly assign roles
                 self.players[i].role = self.setup[c]
-                self.players[i].dname = self.deck[c]
                 self.setup[c].player = self.players[i]
                 self.setup[c].room = self
                 self.players[i].sys("You are the " + self.setup[c].name + ".")
                 c += 1
-            for i in self.players:
-                for it in self.players:
-                    self.players[i].sendMessage("NAME " + str(self.players[it].player_number) + " " + self.players[it].dname)
-
-
-
 
         if (self.time % 2 == 0): # moving to night time
             votes = [p.vote for p in self.players.values() if p.alive]
@@ -175,10 +163,8 @@ class MafiaRoom:
         elif player.alive: # alive chat
             for player in [p for p in self.players.values() if p.chat_number == chat_number or not p.alive]:
                 player.sendMessage("MSG " + str(s_n) + " " + message)
-        else: # dead chat
-            for player in [p for p in self.players.values() if not p.alive]:
-                player.sendMessage("DEADMSG " + str(s_n) + " " + message)
-                
+        else: # dead people don't talk
+            pass
     def vote(self, voter_n, chat_n, target_n, announce):
         if chat_n == -1 or not(self.ingame):
             return
@@ -205,8 +191,6 @@ class MafiaRoom:
                 p.alive = True
                 ingame = False
                 p.sys(win_str)
-                p.sendMessage("REVEAL")
-
 
     # TODO come up with a way that's actually scalable
     def add_role(self, name):

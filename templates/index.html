@@ -1,17 +1,17 @@
 <html>
-	<head>
-		<title>Mafia Frontpage</title>
-	</head>
-	<body>
-	  <center><h1>Tapioca Mafia</h1></center>
-    <p>Please set your name here and click the big button. Youll be able to create games after that. For simplicity, I suggest the same name you use in Discord/EM!</p>
+  <head>
+    <title>Mafia Frontpage</title>
+  </head>
+  <body>
+    <center><h1>CPE 490 Mafia</h1></center>
+    <p>Please set your name here. Youll be able to create games after that. </p>
     
-	  <input type="text" id="name">
+    <input type="text" id="name">
     <button type="buton" onclick="setName()">Set Name</button>
-
-<button disabled onclick="newGame()" id="makebutton">Start New Game</button>
-          <script src="static/js/common.js"></script>
-	  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    
+    <button disabled onclick="newGame()" id="makebutton">Start New Game</button>
+    <script src="static/js/common.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
 $$(document).ready(function() {
     var na = readCookie("name");
@@ -40,7 +40,7 @@ function setName() {
     
     $$('#makebutton').prop('disabled', false);
 }
-	  </script>
-	  
-	</body>
+    </script>
+    
+  </body>
 </html>

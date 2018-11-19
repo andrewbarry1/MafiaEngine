@@ -19,6 +19,8 @@ class Cop(Role):
             return []
         else:
             return [Visit(self.player.player_number, target, self.invest, VisitPriority.Most)]
+
+        
     def invest(self, visitor, visited):
         t_align = "the town."
         pname = self.room.players[visited].dname

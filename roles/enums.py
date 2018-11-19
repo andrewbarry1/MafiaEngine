@@ -7,14 +7,14 @@ class Meeting(Enum):
     mafnight = 2
     dead = 3
     cop = 4
-    doc = 5 # TODO redo voting so you don't need to have a meeting to vote (give doc/cop Meeting.none)
-    # mason, templar, etc go here
+    doc = 5
+
     
 class Alignment(Enum):
     town = 0
     mafia = 1
-    # 3ps can go here
 
+    
 class VisitPriority(Enum):
     MafRB = 1
     TownRB = 2

@@ -1,10 +1,9 @@
 $(function () {
-    var socket = new WebSocket("ws://mafia.tapioca.world/ws");
+    var socket = new WebSocket("ws://mafia.miller.claims/ws");
     var name = readCookie("name");
     var players = {}
     var room = parseInt($('#room').text());
     var time = -1;
-    var useRealName = true;
     var id_order = []
     
     socket.onopen = announceSelf;
@@ -12,8 +11,7 @@ $(function () {
     socket.onclose= onClose;
     
     function announceSelf() {
-	
-	socket.send("NAME " + name); // TODO technically a race condition
+	socket.send("NAME " + name);
 	socket.send("JOIN " + room);
     }
     
@@ -52,11 +50,6 @@ $(function () {
 	    var sc = 0, i = 0;
 	    while (sc < 2) if (msg.charAt(i++) == ' ') sc++;
 	    chatMessage(parseInt(tokens[1]), msg.substring(i));
-	}
-	else if (tokens[0] == "DEADMSG") {
-	    var sc = 0, i = 0;
-	    while (sc < 2) if (msg.charAt(i++) == ' ') sc++;
-	    deadChatMessage(parseInt(tokens[1]), msg.substring(i));
 	}
 	else if (tokens[0] == "SYS") {
 	    var sc = 0, i = 0;
@@ -108,7 +101,6 @@ $(function () {
 	    });
 	}
 	else if (tokens[0] == "CHAT") {
-	    //$('#messages').html(""); // TODO tabbed pages for logs?
 	    $('#voteSection').html("");
 	    for (var n in players) {
 		if (players.hasOwnProperty(n)) {
@@ -121,7 +113,6 @@ $(function () {
 	    else timestr = "Day ";
 	    timestr += (Math.floor(time / 2) + 1);
 	    $('#messages').append('<li class="sys">_____________________' + timestr + '____________________</li>');
-	    useRealName = false; // use deck names during the game
 	    refreshPlayerList();
 	}
 	else if (tokens[0] == "DEAD") {
@@ -129,16 +120,6 @@ $(function () {
 	    if (name == players[parseInt(tokens[1])].name) { // it was you
 		$('#voteSection').html("");
 	    }
-	    refreshPlayerList();
-	}
-	else if (tokens[0] == "NAME") { // rename player.
-	    players[parseInt(tokens[1])].dname = tokens[2];
-	    useRealName = false;
-	    shufflePlayers();
-	    refreshPlayerList();
-	}
-	else if (tokens[0] == "REVEAL") {
-	    useRealName = true;
 	    refreshPlayerList();
 	}
 	else if (tokens[0] == "JOIN") {
@@ -171,7 +152,6 @@ $(function () {
 
     function refreshPlayerList() {
 	$('#playerBox').html("");
-	console.log("REFRESHING")
 	for (var x = 0; x < id_order.length; x++) {
 	    var n = id_order[x];
 	    var votestr = "";
@@ -182,14 +162,7 @@ $(function () {
 	    if (!players[n].alive) {
 		cstr = " class='dead'";
 	    }
-	    var namestr = players[n].dname;
-	    if (useRealName && players[n].name == players[n].dname) {
-		namestr = players[n].name;
-	    }
-	    else if (useRealName) {
-		namestr = players[n].dname + "(" + players[n].name + ")";
-	    }
-
+	    var namestr = players[n].name;
 	    var build = namestr + votestr;
 	    if (players[n].name == name) {
 		build = "<u>" + build + "</u>";
@@ -204,10 +177,7 @@ $(function () {
 
     // TODO roll these into once function
     function chatMessage(n, msg) {
-	var name = players[n].dname;
-	if (useRealName) {
-	    name = players[n].name;
-	}
+	var name = players[n].name;
 	$('#messages').append('<li><b>'+name+':</b> '+msg+'</li>');
 	var objDiv = document.getElementById("messagediv");
 	objDiv.scrollTop = objDiv.scrollHeight;

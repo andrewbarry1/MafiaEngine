@@ -16,7 +16,6 @@ rooms = {}
 class MafiaPlayer(WebSocketServerProtocol):
     def __init__(self): # new player
         self.name = "--"
-        self.dname = "--"
         self.room = None
         self.role = None
         self.chat_number = Meeting.pregame
@@ -40,12 +39,12 @@ class MafiaPlayer(WebSocketServerProtocol):
                 room_number = int(tokens[1])
                 if room_number in rooms:
                     self.room = rooms[room_number]
-                    res = self.room.add_player(self)
-                    if (res):
-                        self.sendMessage("JOINED")
-                    else:
-                        self.sendMessage("ERROR")
-                else: # TODO send command to redirect to index?
+                else:
+                    rooms.append(MafiaRoom([Role(), Doctor(), Role(), Mafia()], "dkc.txt"))
+                res = self.room.add_player(self)
+                if res:
+                    self.sendMessage("JOINED")
+                else:
                     self.sendMessage("ERROR")
             except: # not a number, no number, etc
                 self.sendMessage("ERROR")
@@ -53,7 +52,6 @@ class MafiaPlayer(WebSocketServerProtocol):
         elif (command == "NAME"): # set name
             try:
                 self.name = tokens[1]
-                # self.player_number = int(tokens[2])
             except:
                 pass
 
@@ -76,7 +74,7 @@ class MafiaPlayer(WebSocketServerProtocol):
             return
         self.alive = False
         for player in self.room.players.values():
-            player.sys(self.dname + ", the " + self.role.name + ", is dead.")
+            player.sys(self.name + ", the " + self.role.name + ", is dead.")
             player.sendMessage("DEAD " + str(self.player_number))
 
     def setMeeting(self, meet_n):
@@ -102,12 +100,6 @@ class MafiaPlayer(WebSocketServerProtocol):
         print("Client disconnected")
 
 if __name__ == '__main__':
-    # DEBUG create room
-    # TODO how do you create a room from the website (ws connect to this server and use a MAKEROOM command?
-    rooms[0] = MafiaRoom([Role(), Doctor(), Role(), Mafia()], "dkc.txt")
-
-
-    
     factory = WebSocketServerFactory("ws://127.0.0.1:9001",debug=True)
     factory.protocol = MafiaPlayer
     reactor.listenTCP(9001,factory)
