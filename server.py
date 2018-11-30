@@ -37,10 +37,9 @@ class MafiaPlayer(WebSocketServerProtocol):
         if (command == "JOIN"): # join room (game)
             try:
                 room_number = int(tokens[1])
-                if room_number in rooms:
-                    self.room = rooms[room_number]
-                else:
-                    rooms.append(MafiaRoom([Role(), Doctor(), Role(), Mafia()], "dkc.txt"))
+                if room_number not in rooms:
+                    rooms[room_number] = MafiaRoom([Role(), Doctor(), Cop(), Mafia()])
+                self.room = rooms[room_number]
                 res = self.room.add_player(self)
                 if res:
                     self.sendMessage("JOINED")

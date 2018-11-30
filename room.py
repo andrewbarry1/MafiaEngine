@@ -8,7 +8,7 @@ class MafiaRoom:
     pcounter = 0
     ingame = False
     
-    def __init__(self, setup, deck):
+    def __init__(self, setup):
         self.players = {} # MafiaPlayer objects
         self.setup = setup
 
@@ -63,8 +63,11 @@ class MafiaRoom:
                 self.del_role(params)
         elif (command == "STARTGAME" and not self.ingame):
             if (sender.host and self.time == -1 and len(self.players) == len(self.setup)):
-                if len(self.players) <= len(self.deck):
-                    self.advance_time()
+                self.advance_time()
+                self.broadcast('START')
+            else:
+                sender.sys("Not enough players, can't start the game")
+                    
                 
     def gen_vote_list(self, me, vt):
         if not(me.alive): # dead people don't vote
@@ -76,7 +79,7 @@ class MafiaRoom:
         elif (vt == "not me"):
             return "VLIST " + ",".join([str(p.player_number) for p in self.players.values() if p.alive and not(me == p)])
         else:
-            return "VLIST" # cult stuff, masons, etc can go here
+            return "VLIST" # cult stuff, masons, etc could go here
         
 
     def check_advance_time(self):
@@ -103,7 +106,7 @@ class MafiaRoom:
 
         if (self.time % 2 == 0): # moving to night time
             votes = [p.vote for p in self.players.values() if p.alive]
-            vote_processor = self.players.values()[0] # TODO first alive player, not first (!!)
+            vote_processor = self.players.values()[0]
             for p in self.players.values():
                 if (p.role.day_vote_priority >= vote_processor.role.day_vote_priority and p.alive):
                     vote_processor = p
@@ -165,6 +168,8 @@ class MafiaRoom:
                 player.sendMessage("MSG " + str(s_n) + " " + message)
         else: # dead people don't talk
             pass
+
+        
     def vote(self, voter_n, chat_n, target_n, announce):
         if chat_n == -1 or not(self.ingame):
             return
@@ -173,7 +178,13 @@ class MafiaRoom:
                 player.sendMessage("VOTE " + str(voter_n) + " " + str(target_n))
 
 
-    # TODO offload win conditions to the role to support 3ps and multiple factions
+    # low level socket message to everyone
+    def broadcast(self, msg, alive_only=False):
+        for player in [p for p in self.players.values() if p.alive or not alive_only]:
+            player.sendMessage(msg)
+
+            
+    # offload win conditions to the roles?
     def check_win(self):
         alive_players = [p for p in self.players.values() if p.alive]
         winners = []

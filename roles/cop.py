@@ -23,7 +23,7 @@ class Cop(Role):
         
     def invest(self, visitor, visited):
         t_align = "the town."
-        pname = self.room.players[visited].dname
+        pname = self.room.players[visited].name
         if self.room.players[visited].role.alignment == Alignment.mafia:
             t_align = "the mafia."
         self.player.sys("Upon investigation, you realize that " + pname + " is sided with " + t_align)

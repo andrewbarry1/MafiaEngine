@@ -16,6 +16,7 @@ class Alignment(Enum):
 
     
 class VisitPriority(Enum):
+    Vote = 0
     MafRB = 1
     TownRB = 2
     Save = 3

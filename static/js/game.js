@@ -1,6 +1,9 @@
 $(function () {
     var socket = new WebSocket("ws://mafia.miller.claims/ws");
     var name = readCookie("name");
+    if (name == null) {
+	window.location = 'http://mafia.miller.claims';
+    }
     var players = {}
     var room = parseInt($('#room').text());
     var time = -1;
@@ -34,6 +37,9 @@ $(function () {
 	    for (var k in players)
 		if (players.hasOwnProperty(k) && message.split(" ")[1] == players[k].name)
 		    socket.send("VOTE " + k);
+	}
+	else if (message.startsWith("/")) { // generic command
+	    socket.send(message.substring(1));
 	}
 	else {
 	    socket.send("MSG " + message);
@@ -74,9 +80,8 @@ $(function () {
 		sysMessage(voter + " votes for " + voted);
 	    }
 	    refreshPlayerList();
-	    
 	}
-	else if (tokens[0] == "VLIST") { // TODO alphabetize vote list
+	else if (tokens[0] == "VLIST") {
 	    if (tokens.length == 1) return; // Nothing to vote for, do not make select
 	    var options = tokens[1].split(',');
 	    var h_str = "<select id='vote'>";
@@ -135,7 +140,7 @@ $(function () {
 		socket.send("STARTGAME");
 	    });
 	}
-	else if (tokens[0] == "QUIT") {
+	else if (tokens[0] == "QUIT") { // pregame dropout. ingame quits are deaths
 	    var pn = parseInt(tokens[1]);
 	    delete players[pn];
 	    id_order.splice(id_order.indexOf(pn), 1);

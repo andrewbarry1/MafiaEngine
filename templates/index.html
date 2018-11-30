@@ -4,7 +4,7 @@
   </head>
   <body>
     <center><h1>CPE 490 Mafia</h1></center>
-    <p>Please set your name here. Youll be able to create games after that. </p>
+    <p>Please set your name here.</p>
     
     <input type="text" id="name">
     <button type="buton" onclick="setName()">Set Name</button>
@@ -24,9 +24,8 @@ $$(document).ready(function() {
     }
 });
 
-function newGame()
-{
-    // TODO uhhhh (see server.py)
+function newGame() {
+    window.href = 'http://mafia.miller.claims/game/0';
 }
     
 

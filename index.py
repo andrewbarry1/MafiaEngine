@@ -22,6 +22,4 @@ class index:
     
 class game:
     def GET(self, game_number):
-        # TODO redirect to index if name is not set
-        # TODO create static game page from file if game already finished
         return render.game(game_number)
