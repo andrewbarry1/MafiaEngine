@@ -30,13 +30,13 @@ class Role:
 
     def process_night_vote(self, votes):
         return [] # no night vote to process
-    def process_day_vote(self, votes): # process day vote (lynch, shared by all roles)
+    def process_day_vote(self, votes): # process day vote (shared by all roles)
         (counts, target) = vote(votes)
         if target == VOTE_NL: # tied vote or nl - same thing
             return []
         else:
-            return [Visit(self.player.player_number, target, self.lynch, VisitPriority.Vote)]
-    def lynch(self, visitor, visited):
+            return [Visit(self.player.player_number, target, self.dayvote, VisitPriority.Vote)]
+    def dayvote(self, visitor, visited):
         self.room.players[visited].kill()
 
     def get_night_visit(self):

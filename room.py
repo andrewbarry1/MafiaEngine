@@ -119,7 +119,7 @@ class MafiaRoom:
                 p.sendMessage(p.role.get_night_vote())
             v = vote_processor.role.process_day_vote(votes)
             if len(v) > 0:
-                [ve.callback(ve.visitor, ve.visited) for ve in v] # do the lynch + extra
+                [ve.callback(ve.visitor, ve.visited) for ve in v] # do the votekill + extra
 
 
 
