@@ -14,6 +14,9 @@ class Role:
     def __init__(self):
         self.room = None
         self.player = None
+
+    def __str__(self):
+        return 'Villager'
     
     def get_night_action(self): # get night action html
         return ''

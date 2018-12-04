@@ -25,7 +25,8 @@ $$(document).ready(function() {
 });
 
 function newGame() {
-    location.href = 'http://mafia.miller.claims/game/0';
+    var ts = Math.round((new Date()).getTime() / 1000);
+    location.href = 'http://mafia.miller.claims/game/' + ts;
 }
     
 

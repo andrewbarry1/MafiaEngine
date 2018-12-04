@@ -9,6 +9,9 @@ class Doctor(Role):
         self.alignment = Alignment.town
         self.night_chat = Meeting.doc
 
+    def __str__(self):
+        return "Doctor"
+
     def get_night_vote(self):
         return self.room.gen_vote_list(self.player, "not me")
 

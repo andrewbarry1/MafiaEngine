@@ -8,6 +8,9 @@ class Cop(Role):
         self.name = "Cop"
         self.alignment = Alignment.town
         self.night_chat = Meeting.cop
+
+    def __str__(self):
+        return "Cop"
         
     def get_night_vote(self):
         return self.room.gen_vote_list(self.player, "not me")

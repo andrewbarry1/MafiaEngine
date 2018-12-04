@@ -1,5 +1,9 @@
 import random
 from roles.enums import *
+from roles.role import Role
+from roles.cop import Cop
+from roles.mafia import Mafia
+from roles.doctor import Doctor
 class MafiaRoom:
     players = []
     setup = None
@@ -58,15 +62,23 @@ class MafiaRoom:
         elif (command == "ADDROLE" and not self.ingame):
             if (sender.host and self.time == -1):
                 self.add_role(params)
+                self.send_setup(sender)
         elif (command == "DELROLE" and not self.ingame):
             if (sender.host and self.time == -1):
                 self.del_role(params)
+                self.send_setup(sender)
         elif (command == "STARTGAME" and not self.ingame):
             if (sender.host and self.time == -1 and len(self.players) == len(self.setup)):
                 self.advance_time()
                 self.broadcast('START')
             else:
                 sender.sys("Not enough players, can't start the game")
+        elif (command == 'KICK') and sender.host:
+            name = params
+            for player in self.players.values():
+                if player.name == name:
+                    self.del_player(player)
+                    return
                     
                 
     def gen_vote_list(self, me, vt):
@@ -223,3 +235,7 @@ class MafiaRoom:
                 break
         if not(d == -1):
             self.setup.pop(x)
+
+    def send_setup(self, sender):
+        roles = ','.join([str(r) for r in self.setup])
+        sender.sys(roles)

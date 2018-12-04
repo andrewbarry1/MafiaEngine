@@ -9,6 +9,9 @@ class Mafia(Role):
         self.alignment = Alignment.mafia
         self.night_chat = Meeting.mafnight
 
+    def __str__(self):
+        return "Mafia"
+
     def get_night_vote(self):
         return self.room.gen_vote_list(self.player, "not mafia")
 
